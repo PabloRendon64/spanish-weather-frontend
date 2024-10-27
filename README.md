@@ -1,4 +1,4 @@
-# Pablo Rendon - Prueba técnica Spanish Weather API
+# Pablo Rendon - Prueba técnica Spanish Weather Frontend
 ## Requerimientos ##
 
  - Angular 17
