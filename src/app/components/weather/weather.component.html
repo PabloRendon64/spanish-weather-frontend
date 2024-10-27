@@ -1,28 +1,51 @@
 <section>
-  <form>
-    <input type="text" placeholder="Filtar por ciudad" #filter>
-    <button class="primary" type="button" (click)="findCities(filter.value)">Buscar</button>
-    <input type="text" placeholder="Obtener pronostico por ciudad" #filterId>
-    <button class="secondary" type="button" (click)="getWeatherPrediction(filterId.value)">clima</button>
+  <form class="example-form">
+    <mat-form-field class="example-full-width">
+      <mat-label>Municipio</mat-label>
+      <input
+             placeholder="Buscar"
+             aria-label="Municipio"
+             matInput
+             [formControl]="cityControl"
+             [matAutocomplete]="auto">
+      <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onChangeField($event)" [displayWith]="cityAutocompelteDisplayProperty">
+        @for (option of filteredOptions | async; track option) {
+          <mat-option [value]="option">{{option.name}}</mat-option>
+        }
+      </mat-autocomplete>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Unidad de temperatura</mat-label>
+      <mat-select [(ngModel)]="temperatureUnitControl" (selectionChange)="onChangeField($event)" name="temperatureUnitControl">
+        @for (unit of temperatureUnits; track unit) {
+          <mat-option [value]="unit.id">{{unit.name}}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
   </form>
 </section>
-<section>
-  <mat-table class="lessons-table mat-elevation-z8" [dataSource]="weather.probPrecipitacion">
+@if (weather) {
+  <section>
+    <br/>
+    <p>Temperatura media: {{weather.mediaTemperatura| number: '.0-0'}} grados {{temperatureUnitdisplayValue(weather.unidadTemperatura)}}</p>
+    <br/>
+    <h2>Probabilidad de precipitación:</h2>
+    <mat-table class="lessons-table mat-elevation-z8" [dataSource]="weather.probPrecipitacion">
 
-    <ng-container matColumnDef="seqNo">
-      <mat-header-cell *matHeaderCellDef>#</mat-header-cell>
-      <mat-cell *matCellDef="let lesson">{{lesson.seqNo}}</mat-cell>
-    </ng-container>
+      <ng-container matColumnDef="periodo">
+        <mat-header-cell *matHeaderCellDef>Periodo</mat-header-cell>
+        <mat-cell class="description-cell" *matCellDef="let element">{{element.periodo}}h</mat-cell>
+      </ng-container>
 
-    <ng-container matColumnDef="description">
-      <mat-header-cell *matHeaderCellDef>Description</mat-header-cell>
-      <mat-cell class="description-cell" *matCellDef="let lesson">{{lesson.description}}</mat-cell>
+      <ng-container matColumnDef="probabilidad">
+        <mat-header-cell *matHeaderCellDef>Probabilidad</mat-header-cell>
+        <mat-cell *matCellDef="let element">{{element.probabilidad}}%</mat-cell>
+      </ng-container>
 
-    </ng-container>
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
 
-    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
 
-    <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
-
-  </mat-table>
-</section>
+    </mat-table>
+  </section>
+}

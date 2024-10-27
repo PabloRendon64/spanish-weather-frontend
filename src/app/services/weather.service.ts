@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { City } from '../models/city.model';
+import { City, CityResponse } from '../models/city.model';
 import { HttpClient } from "@angular/common/http";
 
 import { Observable } from 'rxjs';
@@ -18,20 +18,19 @@ export class WeatherService {
 
   public getCities(queryName: string): Observable<City[]> {
     const url = environment.weatherApi;
-    return this.httpClient.get<City[]>(url + '/cities/search', { params : new HttpParams().set('query_name', queryName) }).pipe(
-      tap( (cities: City[]) => cities )
-    );
+    return this.httpClient.get<CityResponse>(url + '/cities/search', { params : new HttpParams().set('query_name', queryName) })
+      .pipe(
+        map( (cityResponse : CityResponse) => cityResponse.content)
+      );
   }
 
   public getWeatherPrediction(cityId: number, temperatureUnit?: string): Observable<Weather> {
     const url = environment.weatherApi;
     let params = new HttpParams().set('city_id', cityId)
     if (temperatureUnit) {
-      params.append('temperature_unit', temperatureUnit)
+      params = params.append('temperature_unit', temperatureUnit)
     }
-    return this.httpClient.get<Weather>(url + '/weather/prediction', { params : params }).pipe(
-      tap( (weather: Weather) => weather )
-    );
+    return this.httpClient.get<Weather>(url + '/weather/prediction', { params : params });
   }
 
 }

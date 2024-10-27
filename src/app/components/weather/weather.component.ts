@@ -1,50 +1,89 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import {MatTableModule} from '@angular/material/table';
+import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {Observable} from 'rxjs';
+import {debounceTime, distinctUntilChanged, map, startWith, switchMap, filter, tap} from 'rxjs/operators';
+import {AsyncPipe} from '@angular/common';
+import {MatAutocompleteModule} from '@angular/material/autocomplete';
+import {MatInputModule} from '@angular/material/input';
+import {MatFormFieldModule} from '@angular/material/form-field';
+
 import { City } from '../../models/city.model';
 import { WeatherService } from '../../services/weather.service';
 import { Weather } from '../../models/weather.model';
+import { TemperatureUnit } from '../../models/temperature-unit.model';
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
   selector: 'app-weather',
   standalone: true,
   imports: [
+    FormsModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatInputModule,
+    MatAutocompleteModule,
+    ReactiveFormsModule,
+    AsyncPipe,
+    MatTableModule,
     CommonModule,
   ],
   templateUrl: './weather.component.html',
   styleUrls: ['./weather.component.css'],
 })
 
-export class WeatherComponent {
+export class WeatherComponent implements OnInit {
 
   weatherService = inject(WeatherService);
 
-  cities: City[] = [];
-  city: City | undefined;
+  cityControl = new FormControl();
+  filteredOptions: Observable<City[]> | undefined;
+  temperatureUnitControl = new FormControl();
+  temperatureUnits: TemperatureUnit[] = [{name: 'Celsius', id: 'G_CEL'}, {name: 'Fahrenheit', id: 'G_FAH'} ];
+
   weather: Weather | undefined;
+  displayedColumns: string[] = ['periodo', 'probabilidad'];
 
-  temperatureUnit: string | undefined;
-  queryName: string | undefined;
-
-  constructor() {
+  ngOnInit() {
+    this.filteredOptions = this.cityControl.valueChanges.pipe(
+      startWith(''),
+      debounceTime(500),
+      distinctUntilChanged(),
+      switchMap(value => (value && value.length >= 2) ? this._filter(value || '') : []),
+    );
   }
 
-  findCities(queryName: string) {
-    this.weatherService.getCities(queryName).subscribe((cities: City[]) => {
-            this.cities = cities;
-            this.city = cities[0];
-            console.log(cities);
-        },
+  private _filter(value: string): Observable<City[]> {
+    const filterValue = value.toLowerCase();
+    return this.weatherService.getCities(filterValue)
+      .pipe(
       );
   }
 
-  getWeatherPrediction(city: string) {
-    
-    this.weatherService.getWeatherPrediction(Number(city), this.temperatureUnit).subscribe({
+  cityAutocompelteDisplayProperty(value: City) {
+    if (value) {
+      return value.name;
+    }
+    return '';
+  }
+
+  onChangeField(evt: any) {
+    if (evt.source && this.cityControl.value) {
+      this.getWeatherPrediction(this.cityControl.value);
+    }
+  }
+
+  getWeatherPrediction(city: City) {
+    this.weatherService.getWeatherPrediction(city.id, String(this.temperatureUnitControl)).subscribe({
         next: (weather: Weather) => {
             this.weather = weather;
-            console.log(weather);
         },
       });
+  }
+
+  temperatureUnitdisplayValue(value: string) {
+      return this.temperatureUnits.find(unit => unit.id === value)?.name;
   }
 
 }
