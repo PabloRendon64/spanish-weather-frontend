@@ -75,7 +75,12 @@ export class WeatherComponent implements OnInit {
   }
 
   getWeatherPrediction(city: City) {
-    this.weatherService.getWeatherPrediction(city.id, String(this.temperatureUnitControl)).subscribe({
+    let temperatureUnit:string | undefined;
+    if (this.temperatureUnitControl.value) {
+      temperatureUnit = this.temperatureUnitControl.value;
+    }
+
+    this.weatherService.getWeatherPrediction(city.id, temperatureUnit).subscribe({
         next: (weather: Weather) => {
             this.weather = weather;
         },

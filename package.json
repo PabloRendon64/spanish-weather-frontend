@@ -1,7 +1,7 @@
 {
-  "name": "angular.io-example",
+  "name": "spanish.weather.frontend",
   "version": "0.0.0",
-  "description": "Example project from an angular.io guide.",
+  "description": "Spanish weather frontend to check weather prediction",
   "license": "MIT",
   "scripts": {
     "ng": "ng",
