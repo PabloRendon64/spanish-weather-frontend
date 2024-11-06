@@ -18,6 +18,6 @@ COPY --from=build-step /app/dist/browser /usr/share/nginx/html
 
 COPY ./config/default.conf  /etc/nginx/conf.d/default.conf
 
-EXPOSE 80 4200 443
+EXPOSE 80
 
-CMD ["nginx", "-g", "daemon off;"]
+ENTRYPOINT ["nginx", "-g", "daemon off;"]
